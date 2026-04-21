@@ -1,0 +1,17 @@
+id: tool-single
+name: "Tool確認：単一ツール呼び出し"
+description: "ツール呼び出し → 結果取得 → 最終回答の基本ループを確認します"
+category: tool
+
+turns:
+  - match: ".*"
+    steps:
+      - type: text
+        text: "現在時刻を確認します。"
+      - type: tool_use
+        tool_name: "get_current_time"
+        tool_input:
+          timezone: "Asia/Tokyo"
+        mock_result: "2025-04-18T10:30:00+09:00"
+      - type: text
+        text: "現在の日本時間は 2025年4月18日 10:30 です。"

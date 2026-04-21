@@ -1,0 +1,81 @@
+id: ui-artifact
+name: "UI確認：アーティファクト"
+description: "コードブロックからのアーティファクト抽出とHTML/SVGプレビューを確認します"
+start: html_preview
+
+nodes:
+  html_preview:
+    message: |
+      以下はHTMLのサンプルです。右側のアーティファクトパネルにプレビューが表示されます。
+
+      ```html
+      <!DOCTYPE html>
+      <html lang="ja">
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body {
+            font-family: sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+          }
+          h1 { color: #4f46e5; margin-bottom: 8px; }
+          p { color: #6b7280; }
+          button {
+            margin-top: 16px;
+            padding: 10px 24px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+          }
+          button:hover { background: #4338ca; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <h1>Hello, World!</h1>
+          <p>アーティファクトプレビューのテストです。</p>
+          <button onclick="alert('クリックできます！')">クリックしてみて</button>
+        </div>
+      </body>
+      </html>
+      ```
+    options:
+      - label: "SVGプレビューを確認する"
+        next: svg_preview
+
+  svg_preview:
+    message: |
+      SVGのサンプルです。アーティファクトパネルでインラインプレビューが表示されます。
+
+      ```svg
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <circle cx="100" cy="100" r="90" fill="url(#grad)" />
+        <text x="100" y="95" text-anchor="middle" fill="white" font-size="16" font-family="sans-serif" font-weight="bold">SVG</text>
+        <text x="100" y="118" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="12" font-family="sans-serif">Preview</text>
+      </svg>
+      ```
+    terminal: true
+    options:
+      - label: "最初からやり直す"
+        next: html_preview

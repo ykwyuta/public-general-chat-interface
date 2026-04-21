@@ -1,0 +1,196 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import { Sidebar } from './Sidebar';
+import { Header } from './Header';
+import { MessageList } from '../chat/MessageList';
+import { InputArea } from '../chat/InputArea';
+import { ArtifactPanel } from '../artifact/ArtifactPanel';
+import { SettingsModal } from '../settings/SettingsModal';
+import { ScenarioSelector } from '../scenario/ScenarioSelector';
+import type { ScenarioStartPayload } from '../scenario/ScenarioSelector';
+import { OptionButtons } from '../scenario/OptionButtons';
+import { RequestBanner } from '../chat/RequestBanner';
+import { useChatStore } from '../../stores/chatStore';
+import { useConversations } from '../../hooks/useConversations';
+import { getScript, createMockExecutorFromScript } from '../../scenarios/scripts/index';
+import { setMockExecutor } from '../../lib/tool-registry';
+import { useWorkspaceFiles } from '../../hooks/useWorkspaceFiles';
+
+export function AppLayout() {
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [scenarioSelectorOpen, setScenarioSelectorOpen] = useState(false);
+  const [sidebarOpen] = useState(true);
+  const { settings, createScenarioConversation, updateSettings } = useChatStore();
+  const prevProviderRef = useRef<{ provider: string; model: string } | null>(null);
+  const {
+    createConversation,
+    activeConversationId,
+    activeConversation,
+    loadConversations,
+    loadConversationMessages,
+  } = useConversations();
+
+  // Load conversation list on mount
+  useEffect(() => {
+    loadConversations();
+  }, [loadConversations]);
+
+  // Load messages when active conversation changes
+  useEffect(() => {
+    if (activeConversationId) {
+      loadConversationMessages(activeConversationId);
+    }
+  }, [activeConversationId, loadConversationMessages]);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', settings.theme === 'dark');
+  }, [settings.theme]);
+
+  const messageArtifacts = (activeConversation?.messages ?? []).flatMap(m => m.artifacts);
+  const workspaceArtifacts = useWorkspaceFiles(activeConversationId || undefined);
+  const artifacts = [...messageArtifacts, ...workspaceArtifacts];
+  const hasArtifacts = artifacts.length > 0;
+
+  const handleNewChat = () => {
+    // scripted セッションから通常チャットに戻る際に設定を復元
+    if (settings.provider === 'scripted') {
+      updateSettings(prevProviderRef.current ?? { provider: 'anthropic', model: 'claude-sonnet-4-6' });
+      setMockExecutor(null);
+      prevProviderRef.current = null;
+    }
+    createConversation();
+  };
+
+  const handleStartDemo = (payload: ScenarioStartPayload) => {
+    if (payload.type === 'scenario') {
+      createScenarioConversation(payload.id);
+    } else {
+      // ScriptedProvider モードに切り替え
+      prevProviderRef.current = { provider: settings.provider, model: settings.model };
+      updateSettings({ provider: 'scripted', model: payload.scriptId });
+
+      // ツール呼び出しのモック結果を登録
+      const script = getScript(payload.scriptId);
+      if (script) {
+        setMockExecutor(createMockExecutorFromScript(script));
+      }
+
+      createConversation();
+    }
+    setScenarioSelectorOpen(false);
+  };
+
+  return (
+    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg)' }}>
+      {/* Sidebar */}
+      {sidebarOpen && (
+        <Sidebar
+          onSettingsClick={() => setSettingsOpen(true)}
+          onNewChat={handleNewChat}
+          onDemoAgentClick={() => setScenarioSelectorOpen(true)}
+        />
+      )}
+
+      {/* Main area */}
+      <div className="flex flex-col flex-1 min-w-0">
+        <Header />
+        <div className="flex flex-1 min-h-0">
+          {/* Chat area */}
+          <div className="flex flex-col flex-1 min-w-0">
+            {activeConversationId ? (
+              <>
+                {activeConversation?.requestMessage && activeConversation?.requestSender && (
+                  <RequestBanner
+                    message={activeConversation.requestMessage}
+                    sender={activeConversation.requestSender}
+                    createdAt={activeConversation.requestCreatedAt}
+                  />
+                )}
+                <MessageList conversationId={activeConversationId} />
+                {activeConversation?.scenarioId ? (
+                  <OptionButtons conversationId={activeConversationId} />
+                ) : (
+                  <InputArea conversationId={activeConversationId} />
+                )}
+              </>
+            ) : (
+              <WelcomeScreen
+                onNewChat={handleNewChat}
+                onDemoAgent={() => setScenarioSelectorOpen(true)}
+              />
+            )}
+          </div>
+
+          {/* Artifact panel */}
+          {hasArtifacts && activeConversation && (
+            <ArtifactPanel
+              artifacts={artifacts}
+              conversationId={activeConversation.id}
+              messages={activeConversation.messages}
+            />
+          )}
+        </div>
+      </div>
+
+      {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
+      {scenarioSelectorOpen && (
+        <ScenarioSelector
+          onClose={() => setScenarioSelectorOpen(false)}
+          onStart={handleStartDemo}
+        />
+      )}
+    </div>
+  );
+}
+
+function WelcomeScreen({
+  onNewChat,
+  onDemoAgent,
+}: {
+  onNewChat: () => void;
+  onDemoAgent: () => void;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center flex-1 px-6 text-center">
+      <div className="mb-6">
+        <div
+          className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center text-2xl"
+          style={{ background: 'var(--accent)', color: '#fff' }}
+        >
+          ✦
+        </div>
+        <h1 className="text-2xl font-semibold mb-2" style={{ color: 'var(--text)' }}>
+          General Chat Interface
+        </h1>
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+          チャットを開始しましょう
+        </p>
+      </div>
+      <div className="flex flex-col gap-2 items-center">
+        <button
+          onClick={onNewChat}
+          className="px-5 py-2.5 rounded-lg text-sm font-medium transition-opacity hover:opacity-80"
+          style={{ background: 'var(--accent)', color: '#fff' }}
+        >
+          新しいチャットを始める
+        </button>
+        <button
+          onClick={onDemoAgent}
+          className="px-5 py-2.5 rounded-lg text-sm font-medium transition-colors border"
+          style={{ color: 'var(--text-muted)', borderColor: 'var(--border)', background: 'transparent' }}
+          onMouseEnter={e => {
+            e.currentTarget.style.borderColor = 'var(--accent)';
+            e.currentTarget.style.color = 'var(--accent)';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.borderColor = 'var(--border)';
+            e.currentTarget.style.color = 'var(--text-muted)';
+          }}
+        >
+          🤖 デモエージェントを試す
+        </button>
+      </div>
+    </div>
+  );
+}

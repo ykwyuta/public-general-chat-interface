@@ -1,0 +1,199 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { ArrowLeft, Play, CheckCircle, XCircle, Trash2, Users, FileCode2 } from 'lucide-react';
+import { useTaskStore } from '../../../src/stores/taskStore';
+import { useAuthStore } from '../../../src/stores/authStore';
+import { useTaskStream } from '../../../src/hooks/useTaskStream';
+import { useTaskPolling } from '../../../src/hooks/useTaskPolling';
+import { TaskMessageList } from '../../../src/components/task/TaskMessageList';
+import { TaskInputArea } from '../../../src/components/task/TaskInputArea';
+import { TaskParticipantPanel } from '../../../src/components/task/TaskParticipantPanel';
+import { TaskArtifactPanel } from '../../../src/components/task/TaskArtifactPanel';
+import { TaskStatusBadge } from '../../../src/components/task/TaskStatusBadge';
+import { parseArtifacts } from '../../../src/lib/artifactParser';
+
+type RightPanel = 'participants' | 'artifacts';
+
+export default function TaskRoomPage() {
+  const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const taskId = params.id;
+  const { user } = useAuthStore();
+  const { tasks, taskMessages, streamingAgents, pendingMessageIds, loadTask, updateTaskStatus, deleteTask, sendMessage, removeParticipant } = useTaskStore();
+  const [statusError, setStatusError] = useState('');
+  const [deleteError, setDeleteError] = useState('');
+  const [rightPanel, setRightPanel] = useState<RightPanel>('participants');
+
+  const task = tasks.find(t => t.id === taskId);
+  const messages = taskMessages[taskId] ?? [];
+  const isPending = !!pendingMessageIds[taskId];
+  const currentAgentStreams = Object.fromEntries(
+    Object.entries(streamingAgents).filter(([name]) =>
+      task?.participants.some(p => p.participantType === 'llm' && p.agentName === name),
+    ),
+  );
+
+  const artifactCount = messages
+    .filter(m => m.senderType === 'llm')
+    .flatMap(m => parseArtifacts(m.content))
+    .length;
+
+  // アーティファクトが生成されたら自動的にアーティファクトパネルへ切り替え
+  useEffect(() => {
+    if (artifactCount > 0) setRightPanel('artifacts');
+  }, [artifactCount]);
+
+  useTaskStream(taskId);
+  useTaskPolling(taskId);
+
+  useEffect(() => {
+    if (taskId) loadTask(taskId);
+  }, [taskId]);
+
+  if (!task) {
+    return <div className="flex-1 flex items-center justify-center text-sm" style={{ color: 'var(--text-muted)' }}>読み込み中…</div>;
+  }
+
+  const username = user?.username ?? '';
+  const isCreator = task.createdBy === username;
+  const canTerminate = isCreator || task.participants.some(p => p.participantType === 'human' && 'username' in p && p.username === username && p.canTerminate);
+
+  const handleStatusChange = async (status: 'active' | 'completed' | 'cancelled') => {
+    setStatusError('');
+    try {
+      await updateTaskStatus(taskId, status);
+    } catch (e) {
+      setStatusError((e as Error).message);
+    }
+  };
+
+  const handleDelete = async () => {
+    setDeleteError('');
+    try {
+      await deleteTask(taskId);
+      router.push('/tasks');
+    } catch (e) {
+      setDeleteError((e as Error).message);
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="flex items-center gap-3 px-4 py-3 border-b flex-shrink-0" style={{ borderColor: 'var(--border)' }}>
+        <button onClick={() => router.push('/tasks')} style={{ color: 'var(--text-muted)' }}>
+          <ArrowLeft size={18} />
+        </button>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <h1 className="text-sm font-semibold truncate" style={{ color: 'var(--text)' }}>{task.title}</h1>
+            <TaskStatusBadge status={task.status} />
+          </div>
+          <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{task.purpose}</p>
+        </div>
+        {(statusError || deleteError) && (
+          <span className="text-xs text-red-500">{statusError || deleteError}</span>
+        )}
+        <div className="flex gap-1 flex-shrink-0">
+          {(task.status === 'completed' || task.status === 'cancelled') && isCreator && (
+            <button
+              onClick={handleDelete}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium"
+              style={{ background: '#6B7280', color: '#fff' }}
+              title="タスクを削除"
+            >
+              <Trash2 size={12} /> 削除
+            </button>
+          )}
+          {task.status === 'draft' && isCreator && (
+            <button
+              onClick={() => handleStatusChange('active')}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium"
+              style={{ background: '#10B981', color: '#fff' }}
+            >
+              <Play size={12} /> 開始
+            </button>
+          )}
+          {task.status === 'active' && canTerminate && (
+            <>
+              <button onClick={() => handleStatusChange('completed')} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: '#3B82F6', color: '#fff' }}>
+                <CheckCircle size={12} /> 完了
+              </button>
+              <button onClick={() => handleStatusChange('cancelled')} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: '#EF4444', color: '#fff' }}>
+                <XCircle size={12} /> キャンセル
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="flex flex-1 min-h-0">
+        <div className="flex flex-col flex-1 min-w-0">
+          <TaskMessageList messages={messages} streamingAgents={currentAgentStreams} currentUsername={username} isPending={isPending} />
+          <TaskInputArea
+            participants={task.participants}
+            currentUsername={username}
+            disabled={task.status !== 'active'}
+            isPending={isPending}
+            onSend={(content, images) => sendMessage(taskId, content, images)}
+          />
+        </div>
+
+        {/* Right panel with tab toggle */}
+        <div className="flex flex-col border-l flex-shrink-0" style={{ borderColor: 'var(--border)', width: 380 }}>
+          {/* Tab bar */}
+          <div className="flex border-b flex-shrink-0" style={{ borderColor: 'var(--border)', background: 'var(--sidebar-bg)' }}>
+            <button
+              onClick={() => setRightPanel('participants')}
+              className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium transition-colors"
+              style={{
+                color: rightPanel === 'participants' ? 'var(--accent)' : 'var(--text-muted)',
+                borderBottom: rightPanel === 'participants' ? '2px solid var(--accent)' : '2px solid transparent',
+              }}
+            >
+              <Users size={12} />
+              参加者
+            </button>
+            <button
+              onClick={() => setRightPanel('artifacts')}
+              className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium transition-colors"
+              style={{
+                color: rightPanel === 'artifacts' ? 'var(--accent)' : 'var(--text-muted)',
+                borderBottom: rightPanel === 'artifacts' ? '2px solid var(--accent)' : '2px solid transparent',
+              }}
+            >
+              <FileCode2 size={12} />
+              アーティファクト
+              {artifactCount > 0 && (
+                <span
+                  className="ml-1 px-1.5 py-0.5 rounded-full text-xs"
+                  style={{ background: 'var(--accent)', color: '#fff', fontSize: 10 }}
+                >
+                  {artifactCount}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {/* Panel content */}
+          <div className="flex-1 min-h-0 overflow-hidden">
+            {rightPanel === 'participants' ? (
+              <TaskParticipantPanel
+                participants={task.participants}
+                createdBy={task.createdBy}
+                currentUsername={username}
+                onRemove={isCreator ? (pid) => removeParticipant(taskId, pid) : undefined}
+                embedded
+              />
+            ) : (
+              <TaskArtifactPanel messages={messages} />
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

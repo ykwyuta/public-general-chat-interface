@@ -1,0 +1,91 @@
+id: ui-code
+name: "UI確認：コードブロック"
+description: "各言語のシンタックスハイライトとコピーボタンを確認します"
+start: typescript
+
+nodes:
+  typescript:
+    message: |
+      ### TypeScript サンプル
+
+      ```typescript
+      interface User {
+        id: string;
+        name: string;
+        email: string;
+        createdAt: Date;
+      }
+
+      async function fetchUser(id: string): Promise<User | null> {
+        const res = await fetch(`/api/users/${id}`);
+        if (!res.ok) return null;
+        return res.json() as Promise<User>;
+      }
+
+      // ジェネリクスの例
+      function identity<T>(arg: T): T {
+        return arg;
+      }
+      ```
+    options:
+      - label: "Pythonを確認する"
+        next: python
+      - label: "SQLを確認する"
+        next: sql
+
+  python:
+    message: |
+      ### Python サンプル
+
+      ```python
+      from dataclasses import dataclass
+      from typing import Optional
+      import httpx
+
+      @dataclass
+      class User:
+          id: str
+          name: str
+          email: str
+
+      async def fetch_user(user_id: str) -> Optional[User]:
+          async with httpx.AsyncClient() as client:
+              response = await client.get(f"/api/users/{user_id}")
+              if response.status_code != 200:
+                  return None
+              data = response.json()
+              return User(**data)
+      ```
+    options:
+      - label: "SQLを確認する"
+        next: sql
+      - label: "最初に戻る"
+        next: typescript
+
+  sql:
+    message: |
+      ### SQL サンプル
+
+      ```sql
+      CREATE TABLE users (
+        id          TEXT PRIMARY KEY,
+        name        TEXT NOT NULL,
+        email       TEXT UNIQUE NOT NULL,
+        created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+
+      -- ユーザーとその投稿数を取得
+      SELECT
+        u.id,
+        u.name,
+        COUNT(p.id) AS post_count
+      FROM users u
+      LEFT JOIN posts p ON p.user_id = u.id
+      GROUP BY u.id, u.name
+      ORDER BY post_count DESC
+      LIMIT 10;
+      ```
+    terminal: true
+    options:
+      - label: "最初からやり直す"
+        next: typescript

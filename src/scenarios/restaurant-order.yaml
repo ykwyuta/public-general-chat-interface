@@ -1,0 +1,136 @@
+id: restaurant-order
+name: レストラン注文
+description: レストランでのシンプルな注文フローのデモ
+start: welcome
+
+nodes:
+  welcome:
+    message: "いらっしゃいませ！本日のメニューをご案内します。\nどのようなお料理をご希望ですか？"
+    options:
+      - label: "ランチセットを見る"
+        next: lunch
+      - label: "アラカルトを見る"
+        next: alacarte
+      - label: "ドリンクのみ"
+        next: drinks
+
+  lunch:
+    message: "本日のランチセット（11:00〜14:00）\n\nAセット: ハンバーグ + サラダ + スープ + ライス  ¥1,200\nBセット: 魚の日替わり + 小鉢2品 + ご飯 + 味噌汁  ¥1,100\nCセット: パスタ + サラダ + ドリンク  ¥1,300"
+    options:
+      - label: "Aセット（ハンバーグ）にする"
+        next: lunch_a
+      - label: "Bセット（魚の日替わり）にする"
+        next: lunch_b
+      - label: "Cセット（パスタ）にする"
+        next: lunch_c
+      - label: "戻る"
+        next: welcome
+
+  lunch_a:
+    message: "Aセット（ハンバーグ）をご注文ですね。\nライスの量はいかがしますか？"
+    options:
+      - label: "普通盛り"
+        next: drink_choice
+      - label: "大盛り（+¥100）"
+        next: drink_choice
+      - label: "少なめ"
+        next: drink_choice
+
+  lunch_b:
+    message: "Bセット（魚の日替わり）をご注文ですね。\nご飯の量はいかがしますか？"
+    options:
+      - label: "普通盛り"
+        next: confirm
+      - label: "大盛り（+¥100）"
+        next: confirm
+      - label: "少なめ"
+        next: confirm
+
+  lunch_c:
+    message: "Cセット（パスタ）をご注文ですね。\nパスタの種類をお選びください。"
+    options:
+      - label: "カルボナーラ"
+        next: drink_choice
+      - label: "ボロネーゼ"
+        next: drink_choice
+      - label: "ペペロンチーノ"
+        next: drink_choice
+
+  alacarte:
+    message: "アラカルトメニューです。\n\n前菜:\n  彩り野菜のサラダ  ¥650\n  本日のスープ  ¥500\n\nメイン:\n  黒毛和牛のステーキ  ¥3,200\n  鮮魚のムニエル  ¥2,400\n  チキンのグリル  ¥1,800\n\nデザート:\n  本日のケーキ  ¥600\n  アイスクリーム  ¥500"
+    options:
+      - label: "彩り野菜のサラダ"
+        next: confirm
+      - label: "黒毛和牛のステーキ"
+        next: steak_option
+      - label: "鮮魚のムニエル"
+        next: confirm
+      - label: "チキンのグリル"
+        next: confirm
+      - label: "デザートのみ"
+        next: dessert
+      - label: "戻る"
+        next: welcome
+
+  steak_option:
+    message: "黒毛和牛のステーキをご注文ですね。\n焼き加減をお選びください。"
+    options:
+      - label: "レア"
+        next: confirm
+      - label: "ミディアムレア"
+        next: confirm
+      - label: "ミディアム"
+        next: confirm
+      - label: "ウェルダン"
+        next: confirm
+
+  drinks:
+    message: "ドリンクメニューです。\n\nホット:\n  コーヒー  ¥450\n  紅茶  ¥450\n  緑茶  ¥400\n\nコールド:\n  アイスコーヒー  ¥500\n  コーラ  ¥400\n  オレンジジュース  ¥450\n\nアルコール:\n  生ビール  ¥650\n  グラスワイン  ¥700"
+    options:
+      - label: "ホットコーヒー"
+        next: confirm
+      - label: "アイスコーヒー"
+        next: confirm
+      - label: "生ビール"
+        next: confirm
+      - label: "グラスワイン"
+        next: wine_type
+      - label: "その他（オレンジジュース等）"
+        next: confirm
+      - label: "戻る"
+        next: welcome
+
+  wine_type:
+    message: "グラスワインの種類をお選びください。"
+    options:
+      - label: "赤ワイン"
+        next: confirm
+      - label: "白ワイン"
+        next: confirm
+      - label: "ロゼ"
+        next: confirm
+
+  drink_choice:
+    message: "お食事にドリンクはいかがですか？"
+    options:
+      - label: "コーヒー（+¥200）"
+        next: confirm
+      - label: "紅茶（+¥200）"
+        next: confirm
+      - label: "いいえ、不要です"
+        next: confirm
+
+  dessert:
+    message: "デザートのご注文ですね。\nどちらになさいますか？"
+    options:
+      - label: "本日のケーキ（¥600）"
+        next: confirm
+      - label: "アイスクリーム（¥500）"
+        next: confirm
+
+  confirm:
+    message: "ありがとうございます！\nご注文を承りました。\n\nお料理の準備ができましたらお持ちします。\nしばらくお待ちください。"
+    terminal: true
+    options:
+      - label: "最初からやり直す"
+        next: welcome

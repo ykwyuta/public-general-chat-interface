@@ -1,0 +1,201 @@
+id: customer-support
+name: カスタマーサポート
+description: 商品・注文・返品に関するよくある問い合わせ対応デモ
+start: greeting
+
+nodes:
+  greeting:
+    message: "こんにちは！カスタマーサポートへようこそ。\nどのようなことでお困りですか？"
+    options:
+      - label: "製品について知りたい"
+        next: product
+      - label: "注文・配送について"
+        next: order
+      - label: "返品・交換について"
+        next: returns
+      - label: "その他のご質問"
+        next: other
+
+  product:
+    message: "製品についてのご質問ですね。\nどのような点についてお聞きですか？"
+    options:
+      - label: "使い方・操作方法"
+        next: product_usage
+      - label: "仕様・スペック"
+        next: product_spec
+      - label: "故障・不具合"
+        next: product_trouble
+      - label: "最初の質問に戻る"
+        next: greeting
+
+  product_usage:
+    message: "操作方法についてのご質問ですね。\n詳細なマニュアルは製品付属のドキュメントをご参照ください。\n\n追加でご不明な点がございましたら、サポートチームへお問い合わせください。"
+    options:
+      - label: "他の質問をする"
+        next: greeting
+      - label: "オペレーターに繋いでもらう"
+        next: operator
+      - label: "ありがとうございました"
+        next: end
+
+  product_spec:
+    message: "仕様・スペックについてのご質問ですね。\n公式サイトの製品ページに詳細な仕様が掲載されています。\n\n特定の製品について詳しく知りたい場合は、製品名をお知らせください。"
+    options:
+      - label: "他の質問をする"
+        next: greeting
+      - label: "オペレーターに繋いでもらう"
+        next: operator
+      - label: "ありがとうございました"
+        next: end
+
+  product_trouble:
+    message: "ご不便をおかけして申し訳ございません。\n不具合の症状を確認させてください。"
+    options:
+      - label: "電源が入らない"
+        next: trouble_power
+      - label: "動作が遅い・固まる"
+        next: trouble_performance
+      - label: "その他の不具合"
+        next: operator
+      - label: "最初の質問に戻る"
+        next: greeting
+
+  trouble_power:
+    message: "電源が入らない場合の対処法：\n\n1. 電源ケーブルが正しく接続されているか確認してください\n2. コンセントに問題がないか別の機器で確認してください\n3. 本体の電源ボタンを5秒以上長押ししてください\n\n以上でも解決しない場合は、修理対応となります。"
+    options:
+      - label: "解決した"
+        next: resolved
+      - label: "解決しなかった - 修理依頼"
+        next: repair
+      - label: "他の質問をする"
+        next: greeting
+
+  trouble_performance:
+    message: "動作が遅い・固まる場合の対処法：\n\n1. 本体を再起動してください\n2. 不要なアプリケーションを終了してください\n3. ストレージの空き容量を確認してください\n\n改善しない場合は、設定の初期化をお試しください。"
+    options:
+      - label: "解決した"
+        next: resolved
+      - label: "解決しなかった"
+        next: operator
+      - label: "他の質問をする"
+        next: greeting
+
+  order:
+    message: "注文・配送についてのご質問ですね。\nどのような点についてお聞きですか？"
+    options:
+      - label: "注文状況の確認"
+        next: order_status
+      - label: "配送日時の変更"
+        next: order_delivery
+      - label: "注文のキャンセル"
+        next: order_cancel
+      - label: "最初の質問に戻る"
+        next: greeting
+
+  order_status:
+    message: "注文状況の確認は、ご注文時にお送りした確認メールに記載のURLからご確認いただけます。\n\nメールが見当たらない場合は、迷惑メールフォルダをご確認ください。"
+    options:
+      - label: "メールが見つからない"
+        next: operator
+      - label: "他の質問をする"
+        next: greeting
+      - label: "ありがとうございました"
+        next: end
+
+  order_delivery:
+    message: "配送日時の変更は、発送前であれば可能です。\n\nお急ぎの場合は、オペレーターにお繋ぎします。"
+    options:
+      - label: "オペレーターに繋いでもらう"
+        next: operator
+      - label: "他の質問をする"
+        next: greeting
+      - label: "ありがとうございました"
+        next: end
+
+  order_cancel:
+    message: "注文キャンセルは、発送前であれば可能です。\n\n発送後のキャンセルは承りかねますが、返品対応が可能です。"
+    options:
+      - label: "キャンセル手続きをしたい"
+        next: operator
+      - label: "返品について知りたい"
+        next: returns
+      - label: "他の質問をする"
+        next: greeting
+
+  returns:
+    message: "返品・交換についてのご質問ですね。\n商品お届けから30日以内であれば、未使用品に限り返品・交換が可能です。\n\nどのような手続きをご希望ですか？"
+    options:
+      - label: "返品手続きをしたい"
+        next: return_process
+      - label: "交換手続きをしたい"
+        next: exchange_process
+      - label: "最初の質問に戻る"
+        next: greeting
+
+  return_process:
+    message: "返品手続きについてご案内します。\n\n1. 返品フォームに必要事項を記入してください\n2. 商品を元の包装材で梱包してください\n3. 着払いにて指定の住所へ発送してください\n\n返金は商品受領後、5〜7営業日以内に処理されます。"
+    options:
+      - label: "オペレーターに繋いでもらう"
+        next: operator
+      - label: "他の質問をする"
+        next: greeting
+      - label: "ありがとうございました"
+        next: end
+
+  exchange_process:
+    message: "交換手続きについてご案内します。\n\n1. 交換依頼フォームに必要事項を記入してください\n2. 旧商品を元の包装材で梱包してください\n3. 着払いにて指定の住所へ発送してください\n\n新しい商品は旧商品受領後、2〜3営業日以内に発送されます。"
+    options:
+      - label: "オペレーターに繋いでもらう"
+        next: operator
+      - label: "他の質問をする"
+        next: greeting
+      - label: "ありがとうございました"
+        next: end
+
+  other:
+    message: "その他のご質問ですね。\n大変恐れ入りますが、詳しい内容についてはオペレーターにお繋ぎします。"
+    options:
+      - label: "オペレーターに繋いでもらう"
+        next: operator
+      - label: "よくあるご質問を見る"
+        next: faq
+      - label: "最初の質問に戻る"
+        next: greeting
+
+  faq:
+    message: "よくあるご質問（FAQ）：\n\n・Q: 保証期間はいつまでですか？\n  A: 購入日から1年間です。\n\n・Q: 海外での使用は可能ですか？\n  A: 一部の製品は海外でご使用いただけます。\n\n・Q: 修理にかかる費用は？\n  A: 保証期間内は無償、期間外は有償となります。"
+    options:
+      - label: "解決した"
+        next: resolved
+      - label: "解決しなかった"
+        next: operator
+      - label: "他の質問をする"
+        next: greeting
+
+  operator:
+    message: "オペレーターにお繋ぎします。\n\n受付時間：平日 9:00〜18:00\nお電話番号：0120-XXX-XXX\n\n混雑時はお待ちいただく場合がございます。ご了承ください。"
+    terminal: true
+    options:
+      - label: "最初からやり直す"
+        next: greeting
+
+  repair:
+    message: "修理のお申し込みを承ります。\n\n修理受付センターまでご連絡ください。\nTEL: 0120-XXX-XXX（平日 9:00〜18:00）\n\nお電話の際は、製品のシリアル番号をご用意ください。"
+    terminal: true
+    options:
+      - label: "最初からやり直す"
+        next: greeting
+
+  resolved:
+    message: "問題が解決されて良かったです！\n\nご不明な点がございましたら、いつでもお気軽にお問い合わせください。\nご利用いただきありがとうございました。"
+    terminal: true
+    options:
+      - label: "最初からやり直す"
+        next: greeting
+
+  end:
+    message: "ありがとうございました！\n\nまたのご利用を心よりお待ちしております。\n良い一日をお過ごしください。"
+    terminal: true
+    options:
+      - label: "最初からやり直す"
+        next: greeting

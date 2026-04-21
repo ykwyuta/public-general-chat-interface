@@ -1,0 +1,23 @@
+id: tool-multiple
+name: "Tool確認：複数ツール順次呼び出し"
+description: "1応答で複数ツールを呼び出す順次実行ループを確認します"
+category: tool
+
+turns:
+  - match: ".*"
+    steps:
+      - type: text
+        text: "天気と為替レートを同時に調べます。"
+      - type: tool_use
+        tool_name: "get_weather"
+        tool_input:
+          location: "Tokyo"
+        mock_result: "晴れ、気温22度、湿度60%"
+      - type: tool_use
+        tool_name: "get_exchange_rate"
+        tool_input:
+          from: "USD"
+          to: "JPY"
+        mock_result: "1 USD = 155.2 JPY"
+      - type: text
+        text: "東京の天気は晴れで気温22度です。現在の為替レートは1ドル＝155.2円です。"

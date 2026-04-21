@@ -1,0 +1,15 @@
+id: tool-error
+name: "Tool確認：ツールエラー"
+description: "ツール実行エラー時のエラー表示とリカバリーを確認します"
+category: tool
+
+turns:
+  - match: ".*"
+    steps:
+      - type: tool_use
+        tool_name: "get_weather"
+        tool_input:
+          location: "Unknown"
+        mock_result: "__ERROR__: 指定された場所の天気情報を取得できませんでした"
+      - type: text
+        text: "申し訳ありません。指定された場所の天気情報を取得できませんでした。別の都市名でお試しください。"

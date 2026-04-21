@@ -1,0 +1,236 @@
+# ファイル分類ドキュメント (クライアント/サーバー/両方)
+
+Next.js App Routerアーキテクチャにおける、アプリケーションのファイル（`.ts`, `.tsx`）の動作環境分類です。
+
+---
+
+## 1. クライアントだけで動くもの (Client-only)
+ブラウザ上で状態管理（Zustandなど）、イベントハンドリング、またはReact Hooksを必要とするファイル群です。
+`"use client"`ディレクティブが指定されているコンポーネントや、Hooks、Store定義などが含まれます。
+
+- `app/auth/error/page.tsx`
+  - **概要**: 汎用モジュール・コンポーネント
+- `app/page.tsx`
+  - **概要**: 汎用モジュール・コンポーネント
+- `app/task-templates/page.tsx`
+  - **概要**: 汎用モジュール・コンポーネント
+- `app/tasks/[id]/page.tsx`
+  - **概要**: 汎用モジュール・コンポーネント
+- `app/tasks/page.tsx`
+  - **概要**: 汎用モジュール・コンポーネント
+- `src/components/auth/AuthGuard.tsx`
+  - **概要**: ログイン・認証フォームやガード用コンポーネント
+- `src/components/auth/DemoLoginForm.tsx`
+  - **概要**: ログイン・認証フォームやガード用コンポーネント
+- `src/components/auth/GoogleLoginButton.tsx`
+  - **概要**: ログイン・認証フォームやガード用コンポーネント
+- `src/components/auth/LoginPage.tsx`
+  - **概要**: ログイン・認証フォームやガード用コンポーネント
+- `src/components/auth/UsernameSetupPage.tsx`
+  - **概要**: ログイン・認証フォームやガード用コンポーネント
+- `src/components/chat/InputArea.tsx`
+  - **概要**: チャットメッセージや入力エリア用コンポーネント
+- `src/components/layout/AppLayout.tsx`
+  - **概要**: サイドバー・ヘッダー・レイアウト枠用コンポーネント
+- `src/components/layout/TaskAppLayout.tsx`
+  - **概要**: サイドバー・ヘッダー・レイアウト枠用コンポーネント
+- `src/components/mcp/McpServerForm.tsx`
+  - **概要**: MCPサーバー連携・ツール表示用コンポーネント
+- `src/components/mcp/McpServerPanel.tsx`
+  - **概要**: MCPサーバー連携・ツール表示用コンポーネント
+- `src/components/mcp/McpToolBadge.tsx`
+  - **概要**: MCPサーバー連携・ツール表示用コンポーネント
+- `src/components/providers/SessionProviderWrapper.tsx`
+  - **概要**: 認証やコンテキストを提供するラッパーコンポーネント
+- `src/components/scenario/ScenarioSelector.tsx`
+  - **概要**: シナリオ選択やオプションボタン用コンポーネント
+- `src/components/settings/SettingsModal.tsx`
+  - **概要**: 設定変更用モーダルコンポーネント
+- `src/components/task/TaskArtifactPanel.tsx`
+  - **概要**: タスクメッセージ、ステータス、テンプレート等のタスク機能用コンポーネント
+- `src/hooks/useChat.ts`
+  - **概要**: チャット状態・処理を管理するカスタムフック
+- `src/hooks/useConversations.ts`
+  - **概要**: 会話一覧を取得・管理するカスタムフック
+- `src/hooks/useScenario.ts`
+  - **概要**: シナリオの進行を管理するカスタムフック
+- `src/hooks/useTaskPolling.ts`
+  - **概要**: タスクの更新をポーリングで監視するカスタムフック
+- `src/hooks/useTaskStream.ts`
+  - **概要**: タスクのストリーミング状態を管理するカスタムフック
+- `src/stores/authStore.ts`
+  - **概要**: 認証状態（ユーザー等）を管理するZustandストア
+- `src/stores/chatStore.ts`
+  - **概要**: 現在のチャットや設定を管理するZustandストア
+- `src/stores/mcpStore.ts`
+  - **概要**: MCPサーバー設定や接続状態を管理するZustandストア
+- `src/stores/scenarioStore.ts`
+  - **概要**: 現在のシナリオ状態を管理するZustandストア
+- `src/stores/taskStore.ts`
+  - **概要**: 現在のタスク状態を管理するZustandストア
+- `src/stores/taskTemplateStore.ts`
+  - **概要**: タスクテンプレートを管理するZustandストア
+
+## 2. サーバだけで動くもの (Server-only)
+APIルート（エンドポイント）、データベースアクセス処理（sqlite3）、サーバーコンポーネント（Server Components）など、Node.js / Edgeランタイムなどのサーバー環境でのみ実行されるファイル群です。
+
+- `app/api/auth/[...nextauth]/route.ts`
+  - **概要**: 認証・ログイン用のAPIエンドポイント
+- `app/api/auth/config/route.ts`
+  - **概要**: 認証・ログイン用のAPIエンドポイント
+- `app/api/auth/demo/route.ts`
+  - **概要**: 認証・ログイン用のAPIエンドポイント
+- `app/api/auth/google-user/route.ts`
+  - **概要**: 認証・ログイン用のAPIエンドポイント
+- `app/api/chat/route.ts`
+  - **概要**: チャットのストリーミング用APIエンドポイント
+- `app/api/conversations/[id]/messages/route.ts`
+  - **概要**: 会話履歴管理用のAPIエンドポイント
+- `app/api/conversations/[id]/route.ts`
+  - **概要**: 会話履歴管理用のAPIエンドポイント
+- `app/api/conversations/[id]/title/route.ts`
+  - **概要**: 会話履歴管理用のAPIエンドポイント
+- `app/api/conversations/route.ts`
+  - **概要**: 会話履歴管理用のAPIエンドポイント
+- `app/api/mcp/servers/[id]/connect/route.ts`
+  - **概要**: MCPサーバー設定・管理用のAPIエンドポイント
+- `app/api/mcp/servers/[id]/disconnect/route.ts`
+  - **概要**: MCPサーバー設定・管理用のAPIエンドポイント
+- `app/api/mcp/servers/[id]/resources/route.ts`
+  - **概要**: MCPサーバー設定・管理用のAPIエンドポイント
+- `app/api/mcp/servers/[id]/route.ts`
+  - **概要**: MCPサーバー設定・管理用のAPIエンドポイント
+- `app/api/mcp/servers/[id]/status/route.ts`
+  - **概要**: MCPサーバー設定・管理用のAPIエンドポイント
+- `app/api/mcp/servers/[id]/tools/route.ts`
+  - **概要**: MCPサーバー設定・管理用のAPIエンドポイント
+- `app/api/mcp/servers/route.ts`
+  - **概要**: MCPサーバー設定・管理用のAPIエンドポイント
+- `app/api/task-templates/[id]/apply/route.ts`
+  - **概要**: タスクテンプレート管理用のAPIエンドポイント
+- `app/api/task-templates/[id]/route.ts`
+  - **概要**: タスクテンプレート管理用のAPIエンドポイント
+- `app/api/task-templates/route.ts`
+  - **概要**: タスクテンプレート管理用のAPIエンドポイント
+- `app/api/tasks/[id]/chat/route.ts`
+  - **概要**: タスク管理・ストリーミング用のAPIエンドポイント
+- `app/api/tasks/[id]/messages/route.ts`
+  - **概要**: タスク管理・ストリーミング用のAPIエンドポイント
+- `app/api/tasks/[id]/participants/[pid]/route.ts`
+  - **概要**: タスク管理・ストリーミング用のAPIエンドポイント
+- `app/api/tasks/[id]/participants/route.ts`
+  - **概要**: タスク管理・ストリーミング用のAPIエンドポイント
+- `app/api/tasks/[id]/route.ts`
+  - **概要**: タスク管理・ストリーミング用のAPIエンドポイント
+- `app/api/tasks/[id]/stream/route.ts`
+  - **概要**: タスク管理・ストリーミング用のAPIエンドポイント
+- `app/api/tasks/route.ts`
+  - **概要**: タスク管理・ストリーミング用のAPIエンドポイント
+- `app/api/workspaces/[sessionId]/files/route.ts`
+  - **概要**: ワークスペースファイル管理用のAPIエンドポイント
+- `app/api/workspaces/[sessionId]/route.ts`
+  - **概要**: ワークスペースファイル管理用のAPIエンドポイント
+- `app/layout.tsx`
+  - **概要**: 汎用モジュール・コンポーネント
+- `app/task-templates/layout.tsx`
+  - **概要**: 汎用モジュール・コンポーネント
+- `app/tasks/layout.tsx`
+  - **概要**: 汎用モジュール・コンポーネント
+- `src/components/artifact/ArtifactCodeView.tsx`
+  - **概要**: アーティファクト（コード抽出等）の表示・プレビュー用コンポーネント
+- `src/components/artifact/ArtifactItem.tsx`
+  - **概要**: アーティファクト（コード抽出等）の表示・プレビュー用コンポーネント
+- `src/components/artifact/ArtifactPanel.tsx`
+  - **概要**: アーティファクト（コード抽出等）の表示・プレビュー用コンポーネント
+- `src/components/artifact/ArtifactPreview.tsx`
+  - **概要**: アーティファクト（コード抽出等）の表示・プレビュー用コンポーネント
+- `src/components/chat/MessageItem.tsx`
+  - **概要**: チャットメッセージや入力エリア用コンポーネント
+- `src/components/chat/MessageList.tsx`
+  - **概要**: チャットメッセージや入力エリア用コンポーネント
+- `src/components/layout/Header.tsx`
+  - **概要**: サイドバー・ヘッダー・レイアウト枠用コンポーネント
+- `src/components/layout/Sidebar.tsx`
+  - **概要**: サイドバー・ヘッダー・レイアウト枠用コンポーネント
+- `src/components/scenario/OptionButtons.tsx`
+  - **概要**: シナリオ選択やオプションボタン用コンポーネント
+- `src/components/task/TaskCreationModal.tsx`
+  - **概要**: タスクメッセージ、ステータス、テンプレート等のタスク機能用コンポーネント
+- `src/components/task/TaskInputArea.tsx`
+  - **概要**: タスクメッセージ、ステータス、テンプレート等のタスク機能用コンポーネント
+- `src/components/task/TaskMessageItem.tsx`
+  - **概要**: タスクメッセージ、ステータス、テンプレート等のタスク機能用コンポーネント
+- `src/components/task/TaskMessageList.tsx`
+  - **概要**: タスクメッセージ、ステータス、テンプレート等のタスク機能用コンポーネント
+- `src/components/task/TaskParticipantPanel.tsx`
+  - **概要**: タスクメッセージ、ステータス、テンプレート等のタスク機能用コンポーネント
+- `src/components/task/TaskStatusBadge.tsx`
+  - **概要**: タスクメッセージ、ステータス、テンプレート等のタスク機能用コンポーネント
+- `src/components/task/TaskTemplateModal.tsx`
+  - **概要**: タスクメッセージ、ステータス、テンプレート等のタスク機能用コンポーネント
+- `src/lib/db.ts`
+  - **概要**: 会話履歴用のSQLiteデータベース接続・操作ロジック
+- `src/lib/mcp/builtin-servers.ts`
+  - **概要**: Model Context Protocolのクライアント・マネージャー・組み込みサーバー等の共通処理
+- `src/lib/taskDb.ts`
+  - **概要**: タスク用のSQLiteデータベースクエリ処理
+- `src/lib/taskTemplateDb.ts`
+  - **概要**: タスクテンプレート用のSQLiteデータベースクエリ処理
+
+## 3. 両方で動くもの (Shared / Both)
+クライアント・サーバー両方からインポートおよび実行される可能性があるファイル群です。主に型定義、共通ユーティリティ関数、定数などが含まれます。
+
+- `src/lib/anthropic.ts`
+  - **概要**: Anthropic関連の共通ユーティリティや定数
+- `src/lib/artifactParser.ts`
+  - **概要**: LLMのテキスト出力からコードブロック等を抽出・パースする汎用関数
+- `src/lib/auth/demoAuth.ts`
+  - **概要**: 認証に関する共通の設定やロジック
+- `src/lib/auth/nextAuth.ts`
+  - **概要**: 認証に関する共通の設定やロジック
+- `src/lib/demo-task-template.ts`
+  - **概要**: デモ用のタスクテンプレート定義・定数
+- `src/lib/llm-provider.ts`
+  - **概要**: LLMプロバイダ間の共通インターフェース定義とファクトリー処理
+- `src/lib/mcp/mcp-client.ts`
+  - **概要**: Model Context Protocolのクライアント・マネージャー・組み込みサーバー等の共通処理
+- `src/lib/mcp/mcp-manager.ts`
+  - **概要**: Model Context Protocolのクライアント・マネージャー・組み込みサーバー等の共通処理
+- `src/lib/providers/bedrock.ts`
+  - **概要**: 各LLMプロバイダの設定や共通の定数・型・簡易なユーティリティ（API呼出自体は主にサーバで実行されます）
+- `src/lib/providers/gemini.ts`
+  - **概要**: 各LLMプロバイダの設定や共通の定数・型・簡易なユーティリティ（API呼出自体は主にサーバで実行されます）
+- `src/lib/providers/index.ts`
+  - **概要**: 各LLMプロバイダの設定や共通の定数・型・簡易なユーティリティ（API呼出自体は主にサーバで実行されます）
+- `src/lib/providers/scripted.ts`
+  - **概要**: 各LLMプロバイダの設定や共通の定数・型・簡易なユーティリティ（API呼出自体は主にサーバで実行されます）
+- `src/lib/scenarioParser.ts`
+  - **概要**: YAMLファイルからシナリオをパース・展開する共通処理
+- `src/lib/taskEventBus.ts`
+  - **概要**: タスクのイベントをハンドリングする共通のイベントバス・ロジック
+- `src/lib/taskMessageAdapter.ts`
+  - **概要**: タスクのメッセージ形式を変換・適合させるアダプター
+- `src/lib/taskSystemPrompt.ts`
+  - **概要**: タスク向けのシステムプロンプトを構築する共通ユーティリティ関数
+- `src/lib/tool-registry.ts`
+  - **概要**: LLM向けツールの定義や登録を管理するレジストリ
+- `src/lib/workspace.ts`
+  - **概要**: ワークスペース関連の共通ロジック
+- `src/scenarios/index.ts`
+  - **概要**: シナリオの定数やインデックスファイル（YAML定義とのマッピングなど）
+- `src/scenarios/scripts/index.ts`
+  - **概要**: シナリオの定数やインデックスファイル（YAML定義とのマッピングなど）
+- `src/types/auth.ts`
+  - **概要**: アプリケーション全体で使用されるTypeScriptのインターフェースや型定義
+- `src/types/index.ts`
+  - **概要**: アプリケーション全体で使用されるTypeScriptのインターフェースや型定義
+- `src/types/mcp.ts`
+  - **概要**: アプリケーション全体で使用されるTypeScriptのインターフェースや型定義
+- `src/types/scenario.ts`
+  - **概要**: アプリケーション全体で使用されるTypeScriptのインターフェースや型定義
+- `src/types/task.ts`
+  - **概要**: アプリケーション全体で使用されるTypeScriptのインターフェースや型定義
+- `src/types/taskTemplate.ts`
+  - **概要**: アプリケーション全体で使用されるTypeScriptのインターフェースや型定義
+- `src/yaml.d.ts`
+  - **概要**: TypeScriptのグローバルな型宣言

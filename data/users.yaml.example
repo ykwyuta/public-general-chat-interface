@@ -1,0 +1,16 @@
+# data/users.yaml - デモ用ユーザー定義ファイル
+# このファイルを users.yaml にコピーして使用してください
+# 警告: 平文パスワードを使用するため、本番環境での使用は禁止
+
+users:
+  - username: admin
+    password: password123
+    displayName: 管理者
+
+  - username: demo
+    password: demo
+    displayName: デモユーザー
+
+  - username: tester
+    password: test1234
+    # displayName 省略時は username を使用
