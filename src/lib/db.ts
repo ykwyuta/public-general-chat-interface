@@ -114,6 +114,30 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_task_template_participants_template
     ON task_template_participants(template_id);
 
+  CREATE TABLE IF NOT EXISTS chat_templates (
+    id               TEXT PRIMARY KEY,
+    name             TEXT NOT NULL,
+    description      TEXT NOT NULL DEFAULT '',
+    welcome_message  TEXT NOT NULL DEFAULT '',
+    system_prompt    TEXT NOT NULL DEFAULT '',
+    mcp_servers      TEXT NOT NULL DEFAULT '[]',
+    created_by       TEXT NOT NULL,
+    created_at       TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at       TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS chat_template_files (
+    id          TEXT PRIMARY KEY,
+    template_id TEXT NOT NULL REFERENCES chat_templates(id) ON DELETE CASCADE,
+    filename    TEXT NOT NULL,
+    content     TEXT NOT NULL,
+    media_type  TEXT NOT NULL,
+    created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_chat_template_files_template
+    ON chat_template_files(template_id);
+
   CREATE TABLE IF NOT EXISTS google_users (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
     email        TEXT UNIQUE NOT NULL,

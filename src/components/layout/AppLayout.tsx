@@ -16,6 +16,9 @@ import { useConversations } from '../../hooks/useConversations';
 import { getScript, createMockExecutorFromScript } from '../../scenarios/scripts/index';
 import { setMockExecutor } from '../../lib/tool-registry';
 import { useWorkspaceFiles } from '../../hooks/useWorkspaceFiles';
+import { useChatTemplateStore } from '../../stores/chatTemplateStore';
+import { useMcpStore } from '../../stores/mcpStore';
+import { ChevronDown } from 'lucide-react';
 
 export function AppLayout() {
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -118,6 +121,27 @@ export function AppLayout() {
               <WelcomeScreen
                 onNewChat={handleNewChat}
                 onDemoAgent={() => setScenarioSelectorOpen(true)}
+                onTemplateSelected={async (templateId) => {
+                  try {
+                    const convId = await createConversation();
+                    const { welcomeMessage, systemPrompt, mcpServers } = await useChatTemplateStore.getState().applyTemplate(templateId, convId);
+
+                    updateSettings({ systemPrompt });
+                    useMcpStore.getState().setSelectedServerIds(mcpServers);
+
+                    if (welcomeMessage) {
+                      useChatStore.getState().addMessage(convId, {
+                        id: crypto.randomUUID(),
+                        role: 'assistant',
+                        artifacts: [],
+                        timestamp: new Date(),
+                        content: welcomeMessage
+                      });
+                    }
+                  } catch (e) {
+                    console.error('Failed to apply template:', e);
+                  }
+                }}
               />
             )}
           </div>
@@ -147,10 +171,19 @@ export function AppLayout() {
 function WelcomeScreen({
   onNewChat,
   onDemoAgent,
+  onTemplateSelected,
 }: {
   onNewChat: () => void;
   onDemoAgent: () => void;
+  onTemplateSelected: (templateId: string) => void;
 }) {
+  const { templates, loadTemplates } = useChatTemplateStore();
+  const [showTemplates, setShowTemplates] = useState(false);
+
+  useEffect(() => {
+    loadTemplates();
+  }, [loadTemplates]);
+
   return (
     <div className="flex flex-col items-center justify-center flex-1 px-6 text-center">
       <div className="mb-6">
@@ -168,13 +201,51 @@ function WelcomeScreen({
         </p>
       </div>
       <div className="flex flex-col gap-2 items-center">
-        <button
-          onClick={onNewChat}
-          className="px-5 py-2.5 rounded-lg text-sm font-medium transition-opacity hover:opacity-80"
-          style={{ background: 'var(--accent)', color: '#fff' }}
-        >
-          新しいチャットを始める
-        </button>
+        <div className="relative">
+          <div className="flex items-center">
+            <button
+              onClick={onNewChat}
+              className="px-5 py-2.5 rounded-l-lg text-sm font-medium transition-opacity hover:opacity-80"
+              style={{ background: 'var(--accent)', color: '#fff' }}
+            >
+              新しいチャットを始める
+            </button>
+            <button
+              onClick={() => setShowTemplates(!showTemplates)}
+              className="px-2 py-2.5 rounded-r-lg border-l transition-opacity hover:opacity-80 flex items-center"
+              style={{ background: 'var(--accent)', color: '#fff', borderColor: 'rgba(255,255,255,0.2)' }}
+            >
+              <ChevronDown size={16} />
+            </button>
+          </div>
+
+          {showTemplates && templates.length > 0 && (
+            <div
+              className="absolute top-full left-0 right-0 mt-1 rounded-lg border shadow-lg z-10 overflow-hidden"
+              style={{ background: 'var(--bg)', borderColor: 'var(--border)' }}
+            >
+              <div className="max-h-60 overflow-y-auto py-1">
+                <div className="px-3 py-1.5 text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>
+                  テンプレートから作成
+                </div>
+                {templates.map(t => (
+                  <button
+                    key={t.id}
+                    onClick={() => {
+                      setShowTemplates(false);
+                      onTemplateSelected(t.id);
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                    style={{ color: 'var(--text)' }}
+                  >
+                    <div className="font-medium">{t.name}</div>
+                    {t.description && <div className="text-xs mt-0.5 truncate" style={{ color: 'var(--text-muted)' }}>{t.description}</div>}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
         <button
           onClick={onDemoAgent}
           className="px-5 py-2.5 rounded-lg text-sm font-medium transition-colors border"

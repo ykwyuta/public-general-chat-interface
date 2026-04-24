@@ -51,7 +51,7 @@ export interface Notification {
 export interface Settings {
   systemPrompt: string;
   model: string;
-  /** 使用するLLMプロバイダーID。未設定時は 'anthropic' にフォールバックする */
+  /** 使用するLLMプロバイダーID */
   provider: string;
   theme: 'light' | 'dark';
 }
@@ -66,3 +66,4 @@ export const AVAILABLE_MODELS = [
   { id: 'us.anthropic.claude-3-haiku-20240307-v1:0', name: 'Claude 3 Haiku (Bedrock)', provider: 'bedrock' },
   { id: 'amazon.nova-pro-v1:0', name: 'Amazon Nova Pro', provider: 'bedrock' },
 ];
+export * from './chatTemplate';

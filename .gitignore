@@ -41,3 +41,6 @@ tsconfig.tsbuildinfo
 
 # Demo auth user definitions (contains plain-text passwords)
 data/users.yaml
+
+# workspace
+workspaces/

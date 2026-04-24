@@ -78,7 +78,22 @@ export function Sidebar({ onSettingsClick, onNewChat, onDemoAgentClick }: Sideba
           }}
         >
           <Layers size={16} style={{ color: 'var(--accent)' }} />
-          テンプレート
+          タスクテンプレート
+        </button>
+        <button
+          onClick={() => router.push('/chat-templates')}
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+          style={{
+            color: 'var(--text)',
+            background: pathname?.startsWith('/chat-templates') ? 'var(--border)' : 'transparent',
+          }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
+          onMouseLeave={e => {
+            if (!pathname?.startsWith('/chat-templates')) e.currentTarget.style.background = 'transparent';
+          }}
+        >
+          <Layers size={16} style={{ color: 'var(--accent)' }} />
+          チャットテンプレート
         </button>
       </div>
 

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { useChatStore } from '../../stores/chatStore';
-import { AVAILABLE_MODELS } from '../../types';
+import { useAvailableModels } from '../../hooks/useAvailableModels';
 import { McpServerPanel } from '../mcp/McpServerPanel';
 
 type Tab = 'general' | 'mcp';
@@ -14,18 +14,21 @@ interface SettingsModalProps {
 
 export function SettingsModal({ onClose }: SettingsModalProps) {
   const { settings, updateSettings } = useChatStore();
+  const { models: availableModels } = useAvailableModels();
   const [tab, setTab] = useState<Tab>('general');
   const [provider, setProvider] = useState(settings.provider);
   const [systemPrompt, setSystemPrompt] = useState(settings.systemPrompt);
   const [model, setModel] = useState(settings.model);
 
-  const availableModelsForProvider = AVAILABLE_MODELS.filter(m => m.provider === provider);
+  // 利用可能なプロバイダー一覧（APIキー設定済みのものだけ）
+  const availableProviders = [...new Set(availableModels.map(m => m.provider))];
+  const availableModelsForProvider = availableModels.filter(m => m.provider === provider);
 
   const handleProviderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newProvider = e.target.value;
     setProvider(newProvider);
 
-    const newAvailableModels = AVAILABLE_MODELS.filter(m => m.provider === newProvider);
+    const newAvailableModels = availableModels.filter(m => m.provider === newProvider);
     if (!newAvailableModels.find(m => m.id === model)) {
       if (newAvailableModels.length > 0) {
         setModel(newAvailableModels[0].id);
@@ -99,9 +102,9 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                   borderColor: 'var(--border)',
                 }}
               >
-                <option value="anthropic">Anthropic</option>
-                <option value="gemini">Google Gemini</option>
-                <option value="bedrock">AWS Bedrock</option>
+                {availableProviders.map(p => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
               </select>
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                 APIキーはサーバー側の環境変数で管理されています

@@ -3,7 +3,7 @@ import { X, Plus, Trash2, FlaskConical, Layers } from 'lucide-react';
 import { useTaskStore } from '../../stores/taskStore';
 import { useTaskTemplateStore } from '../../stores/taskTemplateStore';
 import { useMcpStore } from '../../stores/mcpStore';
-import { AVAILABLE_MODELS } from '../../types';
+import { useAvailableModels } from '../../hooks/useAvailableModels';
 import type { AddParticipantParams } from '../../types/task';
 import { DEMO_TASK_TEMPLATE } from '../../lib/demo-task-template';
 
@@ -19,6 +19,7 @@ export function TaskCreationModal({ currentUsername, onClose, onCreated }: Props
   const { createTask, addParticipant } = useTaskStore();
   const { templates, loadTemplates } = useTaskTemplateStore();
   const { servers, fetchServers } = useMcpStore();
+  const { models: availableModels } = useAvailableModels();
   const [title, setTitle] = useState('');
   const [purpose, setPurpose] = useState('');
   const [completionCondition, setCompletionCondition] = useState('');
@@ -117,7 +118,8 @@ export function TaskCreationModal({ currentUsername, onClose, onCreated }: Props
     }
   };
 
-  const availableModels = AVAILABLE_MODELS.filter(m => m.provider === agentProvider);
+  const availableProviders = [...new Set(availableModels.map(m => m.provider))];
+  const modelsForProvider = availableModels.filter(m => m.provider === agentProvider);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.4)' }}>
@@ -223,11 +225,11 @@ export function TaskCreationModal({ currentUsername, onClose, onCreated }: Props
                 <input className="input-base" value={agentName} onChange={e => setAgentName(e.target.value)} placeholder="エージェント名 (英数字)" />
                 <input className="input-base" value={agentRole} onChange={e => setAgentRole(e.target.value)} placeholder="役割の説明" />
                 <div className="flex gap-2">
-                  <select className="input-base flex-1" value={agentProvider} onChange={e => { setAgentProvider(e.target.value); setAgentModel(AVAILABLE_MODELS.find(m => m.provider === e.target.value)?.id ?? ''); }}>
-                    {['anthropic', 'gemini', 'bedrock'].map(p => <option key={p} value={p}>{p}</option>)}
+                  <select className="input-base flex-1" value={agentProvider} onChange={e => { setAgentProvider(e.target.value); setAgentModel(availableModels.find(m => m.provider === e.target.value)?.id ?? ''); }}>
+                    {availableProviders.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
                   <select className="input-base flex-1" value={agentModel} onChange={e => setAgentModel(e.target.value)}>
-                    {availableModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                    {modelsForProvider.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
                   </select>
                 </div>
                 {servers.length > 0 && (

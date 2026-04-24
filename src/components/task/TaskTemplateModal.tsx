@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, Plus, Trash2 } from 'lucide-react';
 import { useTaskTemplateStore } from '../../stores/taskTemplateStore';
-import { AVAILABLE_MODELS } from '../../types';
+import { useAvailableModels } from '../../hooks/useAvailableModels';
 import type { TaskTemplate, CreateTemplateParticipantParams } from '../../types/taskTemplate';
 
 interface Props {
@@ -14,6 +14,7 @@ type PendingParticipant = CreateTemplateParticipantParams & { key: string };
 
 export function TaskTemplateModal({ template, onClose, onSaved }: Props) {
   const { createTemplate, updateTemplate } = useTaskTemplateStore();
+  const { models: availableModels } = useAvailableModels();
 
   const [name, setName] = useState(template?.name ?? '');
   const [description, setDescription] = useState(template?.description ?? '');
@@ -79,7 +80,8 @@ export function TaskTemplateModal({ template, onClose, onSaved }: Props) {
     }
   };
 
-  const availableModels = AVAILABLE_MODELS.filter(m => m.provider === agentProvider);
+  const availableProviders = [...new Set(availableModels.map(m => m.provider))];
+  const modelsForProvider = availableModels.filter(m => m.provider === agentProvider);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.4)' }}>
@@ -141,11 +143,11 @@ export function TaskTemplateModal({ template, onClose, onSaved }: Props) {
                 <input className="input-base" value={agentName} onChange={e => setAgentName(e.target.value)} placeholder="エージェント名 (英数字)" />
                 <input className="input-base" value={agentRole} onChange={e => setAgentRole(e.target.value)} placeholder="役割の説明" />
                 <div className="flex gap-2">
-                  <select className="input-base flex-1" value={agentProvider} onChange={e => { setAgentProvider(e.target.value); setAgentModel(AVAILABLE_MODELS.find(m => m.provider === e.target.value)?.id ?? ''); }}>
-                    {['anthropic', 'gemini', 'bedrock'].map(p => <option key={p} value={p}>{p}</option>)}
+                  <select className="input-base flex-1" value={agentProvider} onChange={e => { setAgentProvider(e.target.value); setAgentModel(availableModels.find(m => m.provider === e.target.value)?.id ?? ''); }}>
+                    {availableProviders.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
                   <select className="input-base flex-1" value={agentModel} onChange={e => setAgentModel(e.target.value)}>
-                    {availableModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                    {modelsForProvider.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
                   </select>
                 </div>
                 <button onClick={addPending} className="flex items-center gap-1 justify-center px-3 py-1.5 rounded-lg text-sm" style={{ background: 'var(--accent)', color: '#fff' }}>

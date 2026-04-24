@@ -1,12 +1,13 @@
 import { useChatStore } from '../../stores/chatStore';
 import { useAuthStore } from '../../stores/authStore';
-import { AVAILABLE_MODELS } from '../../types';
+import { useAvailableModels } from '../../hooks/useAvailableModels';
 import { Sun, Moon, LogOut } from 'lucide-react';
 import { NotificationPanel } from '../notification/NotificationPanel';
 
 export function Header() {
   const { settings, updateSettings } = useChatStore();
   const { user, logout } = useAuthStore();
+  const { models } = useAvailableModels();
 
   return (
     <header
@@ -14,7 +15,7 @@ export function Header() {
       style={{ borderColor: 'var(--border)', background: 'var(--bg)' }}
     >
       <select
-        value={JSON.stringify({ provider: settings.provider || 'anthropic', model: settings.model })}
+        value={JSON.stringify({ provider: settings.provider, model: settings.model })}
         onChange={e => {
           try {
             const { provider: newProvider, model: newModelId } = JSON.parse(e.target.value);
@@ -32,7 +33,7 @@ export function Header() {
           borderColor: 'var(--border)',
         }}
       >
-        {AVAILABLE_MODELS.map(m => (
+        {models.map(m => (
           <option key={`${m.provider}:${m.id}`} value={JSON.stringify({ provider: m.provider, model: m.id })}>
             {m.name} ({m.provider})
           </option>
