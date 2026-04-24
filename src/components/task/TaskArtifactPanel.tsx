@@ -21,12 +21,22 @@ interface TaskArtifactPanelProps {
 
 function TaskArtifactItem({ artifact }: { artifact: MessageArtifact }) {
   const [expanded, setExpanded] = useState(true);
-  const [viewMode, setViewMode] = useState<'code' | 'preview'>('code');
+  const [viewMode, setViewMode] = useState<'code' | 'preview'>(
+    artifact.kind === 'image' ? 'preview' : 'code'
+  );
   const [copied, setCopied] = useState(false);
 
   const handleDownload = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const blob = new Blob([artifact.content], { type: 'text/plain' });
+    let blob: Blob;
+    if (artifact.kind === 'image' && artifact.mimeType) {
+      const byteChars = atob(artifact.content);
+      const byteArray = new Uint8Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
+      blob = new Blob([byteArray], { type: artifact.mimeType });
+    } else {
+      blob = new Blob([artifact.content], { type: 'text/plain' });
+    }
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -35,7 +45,7 @@ function TaskArtifactItem({ artifact }: { artifact: MessageArtifact }) {
     URL.revokeObjectURL(url);
   };
 
-  const hasPreview = artifact.kind === 'html' || artifact.kind === 'svg' || artifact.kind === 'markdown';
+  const hasPreview = artifact.kind === 'html' || artifact.kind === 'svg' || artifact.kind === 'markdown' || artifact.kind === 'image';
 
   const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -112,7 +122,7 @@ function TaskArtifactItem({ artifact }: { artifact: MessageArtifact }) {
             {viewMode === 'code' || !hasPreview ? (
               <ArtifactCodeView code={artifact.content} language={artifact.language} />
             ) : (
-              <ArtifactPreview content={artifact.content} kind={artifact.kind as 'html' | 'svg' | 'markdown'} />
+              <ArtifactPreview content={artifact.content} kind={artifact.kind as 'html' | 'svg' | 'markdown' | 'image'} mimeType={artifact.mimeType} />
             )}
           </div>
         </div>

@@ -1,4 +1,4 @@
-export type ArtifactKind = 'code' | 'html' | 'svg' | 'markdown';
+export type ArtifactKind = 'code' | 'html' | 'svg' | 'markdown' | 'image';
 
 export interface Artifact {
   id: string;
@@ -6,8 +6,10 @@ export interface Artifact {
   language: string;
   kind: ArtifactKind;
   content: string;
+  mimeType?: string; // 画像の場合のMIMEタイプ
   isExpanded: boolean;
 }
+
 
 export interface ImageAttachment {
   id: string;

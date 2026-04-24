@@ -25,10 +25,13 @@ export function useWorkspaceFiles(sessionId: string | undefined) {
         const contentData = await contentRes.json();
 
         const ext = f.path.split('.').pop()?.toLowerCase() || '';
+        const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'ico', 'tiff', 'tif'];
+
         let kind: ArtifactKind = 'code';
         if (['html'].includes(ext)) kind = 'html';
         else if (['svg'].includes(ext)) kind = 'svg';
         else if (['md', 'markdown'].includes(ext)) kind = 'markdown';
+        else if (IMAGE_EXTS.includes(ext)) kind = 'image';
 
         return {
           id: `ws-${f.path}`,
@@ -36,6 +39,7 @@ export function useWorkspaceFiles(sessionId: string | undefined) {
           language: ext,
           kind,
           content: contentData.content,
+          mimeType: contentData.mimeType,
           isExpanded: false,
         };
       }));

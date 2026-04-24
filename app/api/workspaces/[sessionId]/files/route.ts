@@ -38,11 +38,40 @@ export async function GET(
     return Response.json({ error: `"${filePath}" is a directory, not a file` }, { status: 400 });
   }
 
+  const IMAGE_EXTS: Record<string, string> = {
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    gif: 'image/gif',
+    webp: 'image/webp',
+    bmp: 'image/bmp',
+    ico: 'image/x-icon',
+    tiff: 'image/tiff',
+    tif: 'image/tiff',
+  };
+
+  const ext = (filePath.split('.').pop() ?? '').toLowerCase();
+  const mimeType = IMAGE_EXTS[ext];
+
+  if (mimeType) {
+    // 画像ファイルはbase64エンコードして返す
+    const buffer = fs.readFileSync(resolvedPath);
+    const base64 = buffer.toString('base64');
+    return Response.json({
+      path: filePath,
+      content: base64,
+      size: stat.size,
+      isImage: true,
+      mimeType,
+    });
+  }
+
   const content = fs.readFileSync(resolvedPath, 'utf-8');
 
   return Response.json({
     path: filePath,
     content,
     size: stat.size,
+    isImage: false,
   });
 }
