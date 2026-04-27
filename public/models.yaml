@@ -1,0 +1,40 @@
+# モデル設定ファイル
+#
+# このファイルでアプリで利用可能なLLMモデルを定義します。
+# ビルドなしで反映されます（サーバー再起動は不要）。
+#
+# 各モデルには以下のフィールドが必要です:
+#   id:       LLM APIに渡すモデルID
+#   name:     UI上に表示する名前
+#   provider: プロバイダーID（anthropic / gemini / bedrock）
+#
+# 環境変数でAPIキーが設定されていないプロバイダーのモデルは
+# 自動的に非表示になります。
+#   - anthropic: ANTHROPIC_API_KEY
+#   - gemini:    GOOGLE_GENERATIVE_AI_API_KEY
+#   - bedrock:   AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY
+
+models:
+  # Anthropic Claude
+  - id: qwen/qwen3.6-35b-a3b
+    name: qwen3.6
+    provider: anthropic
+
+  # Google Gemini
+  - id: gemini-3.1-flash-lite-preview
+    name: Gemini 3.1 Flash Lite Preview
+    provider: gemini
+  - id: gemini-3-flash-preview
+    name: Gemini 3 Flash Preview
+    provider: gemini
+
+  # AWS Bedrock
+  - id: us.anthropic.claude-3-5-sonnet-20241022-v2:0
+    name: Claude 3.5 Sonnet v2 (Bedrock)
+    provider: bedrock
+  - id: us.anthropic.claude-3-haiku-20240307-v1:0
+    name: Claude 3 Haiku (Bedrock)
+    provider: bedrock
+  - id: amazon.nova-pro-v1:0
+    name: Amazon Nova Pro
+    provider: bedrock

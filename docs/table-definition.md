@@ -12,8 +12,9 @@
 | id | string | 一意の識別子 |
 | filename | string | ファイル名 |
 | language | string | プログラミング言語やファイル種別 |
-| kind | ArtifactKind | 成果物の種類 ('code' \| 'html' \| 'svg' \| 'markdown') |
+| kind | ArtifactKind | 成果物の種類 ('code' \| 'html' \| 'svg' \| 'markdown' \| 'image') |
 | content | string | 成果物の内容 |
+| mimeType | string | 画像の場合のMIMEタイプ（オプショナル） |
 | isExpanded | boolean | UI上で展開表示されているかどうか |
 
 ### ImageAttachment
@@ -302,3 +303,32 @@ MCPサーバーが提供するリソースの定義を管理します。
 | sessionToken | string \| null | セッショントークン |
 | isAuthenticated | boolean | 認証されているかどうか |
 | authMode | string \| null | 認証モード ('demo' \| 'google' \| 'entra' \| null) |
+
+## 7. チャットテンプレート (src/types/chatTemplate.ts)
+
+### ChatTemplateFile
+チャットテンプレートに紐づくファイル情報を管理します。
+
+| カラム名 | 型 | 説明 |
+| --- | --- | --- |
+| id | string | 一意の識別子 |
+| templateId | string | 親テンプレートのID |
+| filename | string | ファイル名 |
+| content | string | Base64またはテキストの内容 |
+| mediaType | string | メディアタイプ |
+
+### ChatTemplate
+再利用可能なチャットの雛形を管理します。
+
+| カラム名 | 型 | 説明 |
+| --- | --- | --- |
+| id | string | 一意の識別子 |
+| name | string | テンプレート名 |
+| description | string | テンプレートの説明 |
+| welcomeMessage | string | ウェルカムメッセージ |
+| systemPrompt | string | システムプロンプト |
+| mcpServers | string[] | 使用するMCPサーバーIDの配列 |
+| createdBy | string | 作成者のユーザー名 |
+| createdAt | Date | 作成日時 |
+| updatedAt | Date | 更新日時 |
+| files | ChatTemplateFile[] | 紐づくファイルの配列（オプショナル） |

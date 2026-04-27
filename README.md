@@ -40,7 +40,7 @@
 | F-10 | 会話の切り替え | サイドバーから過去の会話に切り替えられる |
 | F-11 | 会話タイトル自動生成 | 最初のメッセージを元に会話タイトルを自動生成する |
 | F-12 | 会話の削除 | 不要な会話を削除できる |
-| F-13 | 会話の永続化 | 会話履歴をローカルストレージに保存し、リロード後も復元できる |
+| F-13 | 会話の永続化 | 会話履歴を SQLite (better-sqlite3) に保存し、リロード後も復元できる |
 
 #### 2.3 モデル・設定機能
 
@@ -48,7 +48,7 @@
 |---|------|------|
 | F-14 | モデル選択 | 使用する AI モデルを UI から切り替えられる |
 | F-15 | システムプロンプト設定 | カスタムシステムプロンプトを設定できる |
-| F-16 | API キー設定 | UI から API キーを設定・保存できる（ローカルのみ保存） |
+| F-16 | プロバイダー設定 | 複数のAIプロバイダー（Anthropic, Gemini, Bedrock等）から使用するものを選択できる。APIキーはサーバーの環境変数で管理する |
 
 #### 2.4 シナリオ（デモエージェント）機能
 
@@ -87,6 +87,7 @@ AI の返答の中に含まれるコード・HTML・SVG 等を「アーティフ
 | Python | `python`, `py` | コード表示（ハイライト） |
 | SVG | `svg` | コード表示 ＋ SVG プレビュー |
 | Markdown | `markdown`, `md` | Markdown レンダリング |
+| 画像 | `image` | 画像表示 |
 | その他 | 上記以外の言語タグ | コード表示（ハイライト） |
 
 #### 2.6 UX 機能
@@ -118,6 +119,47 @@ AI の返答の中に含まれるコード・HTML・SVG 等を「アーティフ
 |---|------|------|
 | F-40 | ログイン | Google OAuth、および YAMLファイルで定義したデモ用アカウントによるログインが可能 |
 | F-41 | ユーザー管理 | ログインユーザーごとのチャット履歴やタスク、テンプレートを分離して管理・保存できる |
+
+#### 2.9 画像添付機能
+
+メッセージ送信時に画像（JPEG/PNG/GIF/WebP）を添付し、LLMに送信できる。
+
+| # | 機能 | 説明 |
+|---|------|------|
+| F-42 | 画像の添付 | ファイル選択により複数の画像をメッセージに添付できる |
+| F-43 | 添付画像のプレビューと削除 | 送信前に添付した画像のサムネイルをプレビューし、削除できる |
+
+#### 2.10 チャットテンプレート機能
+
+特定の用途や目的に合わせたチャット環境をテンプレートとして構築し、再利用できる。
+
+| # | 機能 | 説明 |
+|---|------|------|
+| F-44 | テンプレート作成・管理 | ウェルカムメッセージ、システムプロンプト、デフォルトMCP、コンテキストコンテンツを設定して保存できる |
+| F-45 | ワークスペースへの自動展開 | テンプレートからチャットを開始する際、事前提供データをセッションごとのワークスペースに自動コピーする |
+
+#### 2.11 MCP（Model Context Protocol）連携機能
+
+外部のデータソースやツールと安全に連携し、LLMの機能を拡張する。
+
+| # | 機能 | 説明 |
+|---|------|------|
+| F-46 | MCPサーバーの接続管理 | stdio（ローカル）やSSE（リモート）形式でMCPサーバーを登録・管理・接続できる |
+| F-47 | ツールの動的拡張 | MCPサーバーが提供するツールをUIから選択し、LLMに公開して実行できる |
+| F-48 | リソースのコンテキスト注入 | MCPサーバーが提供するデータをメッセージのコンテキストとして添付できる |
+| F-49 | ツール実行の可視化 | チャット内でMCPツールが実行されたことを専用バッジとして視覚的に表示する |
+| F-50 | 組み込みファイル入出力MCP | LLMが生成した内容の保存、ワークスペース内ファイルの読み込みを安全に行う |
+
+#### 2.12 アーティファクト共有・通知（依頼）機能
+
+特定のユーザーに対して、チャットで生成されたアーティファクトとメッセージを共有し、作業を依頼する。
+
+| # | 機能 | 説明 |
+|---|------|------|
+| F-51 | メンション・アーティファクト指定 | `@username` と `#artifact_name` を用いて宛先と対象ファイルを指定してメッセージを送信できる |
+| F-52 | アプリ内通知機能 | メンションされたユーザーにベルアイコンのバッジで通知し、一覧を表示する |
+| F-53 | 依頼チャットの開始 | 通知から、共有されたアーティファクトとメッセージを引き継いだ新しいチャットを開始できる |
+| F-54 | 依頼事項バナー表示 | 依頼チャットの画面上部に「依頼事項」「依頼者」「依頼日時」をバナー表示する |
 
 ---
 
@@ -218,8 +260,7 @@ AI の返答の中に含まれるコード・HTML・SVG 等を「アーティフ
 | 画面 ID | 画面名 | 説明 |
 |---------|--------|------|
 | S-01 | チャット画面 | メインの会話画面（デフォルト） |
-| S-02 | 設定画面 | API キー・システムプロンプト・テーマ設定 |
-| S-03 | ウェルカム画面 | API キー未設定時に表示するオンボーディング画面 |
+| S-02 | 設定画面 | プロバイダー・モデル・システムプロンプト・テーマ・MCPサーバー設定 |
 
 ---
 
@@ -227,7 +268,7 @@ AI の返答の中に含まれるコード・HTML・SVG 等を「アーティフ
 
 | # | 対象 | 方式 | 備考 |
 |---|------|------|------|
-| I-01 | Anthropic API | REST / SSE ストリーミング | `claude-sonnet-4-6` をデフォルト使用 |
+| I-01 | AI プロバイダー API | REST / SSE ストリーミング | Anthropic (デフォルト), Google GenAI, AWS Bedrock 等に対応 |
 | I-02 | SQLite | `better-sqlite3` | 会話履歴、タスク、メッセージ等を保存 |
 | I-03 | Google OAuth / 認証 | NextAuth.js | ユーザー認証を提供（Demo authにも対応） |
 
@@ -272,22 +313,31 @@ src/
 **主要な型定義（`types/index.ts`）**
 
 ```typescript
-export type ArtifactKind = 'code' | 'html' | 'svg' | 'markdown';
+export type ArtifactKind = 'code' | 'html' | 'svg' | 'markdown' | 'image';
 
 export interface Artifact {
   id: string;
-  filename: string;       // 推定ファイル名（例: index.html）
-  language: string;       // コードブロックの言語タグ
+  filename: string;
+  language: string;
   kind: ArtifactKind;
   content: string;
-  isExpanded: boolean;    // 展開/折りたたみ状態
+  mimeType?: string; // 画像の場合のMIMEタイプ
+  isExpanded: boolean;
+}
+
+export interface ImageAttachment {
+  id: string;
+  data: string;       // base64 encoded (without data URL prefix)
+  mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
+  name: string;
 }
 
 export interface Message {
   id: string;
   role: 'user' | 'assistant';
-  content: string;        // Markdown テキスト（コードブロック含む）
-  artifacts: Artifact[];  // このメッセージから抽出したアーティファクト
+  content: string;
+  images?: ImageAttachment[];
+  artifacts: Artifact[];
   timestamp: Date;
 }
 
@@ -297,14 +347,17 @@ export interface Conversation {
   messages: Message[];
   createdAt: Date;
   updatedAt: Date;
-  scenarioId?: string;    // 進行中のシナリオID（シナリオ利用時）
+  scenarioId?: string;
+  requestMessage?: string;
+  requestSender?: string;
+  requestCreatedAt?: Date;
 }
 
 export interface Settings {
-  apiKey: string;
   systemPrompt: string;
   model: string;
-  provider?: string;      // 使用するLLMプロバイダーID（デフォルトは'anthropic'）
+  /** 使用するLLMプロバイダーID */
+  provider: string;
   theme: 'light' | 'dark';
 }
 ```
@@ -350,6 +403,46 @@ cp .env.local.example .env.local
 ```bash
 cp data/users.yaml.example data/users.yaml
 ```
+
+#### モデルの設定
+
+利用可能なLLMモデルは `public/models.yaml` で一元管理しています。**ビルドなし・サーバー再起動なし**で変更が反映されます。
+
+```yaml
+# public/models.yaml
+
+models:
+  # Anthropic Claude
+  - id: claude-sonnet-4-6
+    name: Claude Sonnet 4.6
+    provider: anthropic
+
+  # Google Gemini
+  - id: gemini-3-flash-preview
+    name: Gemini 3 Flash Preview
+    provider: gemini
+
+  # AWS Bedrock
+  - id: amazon.nova-pro-v1:0
+    name: Amazon Nova Pro
+    provider: bedrock
+```
+
+| フィールド | 説明 |
+|-----------|------|
+| `id` | LLM APIに渡すモデルID（プロバイダーのドキュメントを参照） |
+| `name` | UI上に表示される名前（任意の文字列） |
+| `provider` | `anthropic` / `gemini` / `bedrock` のいずれか |
+
+> **注意:** 環境変数でAPIキーが設定されていないプロバイダーのモデルは自動的に非表示になります。
+>
+> | provider | 必要な環境変数 |
+> |----------|--------------|
+> | `anthropic` | `ANTHROPIC_API_KEY` |
+> | `gemini` | `GOOGLE_GENERATIVE_AI_API_KEY` |
+> | `bedrock` | `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` |
+
+モデルを追加・変更する場合は `public/models.yaml` を編集するだけです。コードの変更は不要です。
 
 #### 開発サーバーの起動
 

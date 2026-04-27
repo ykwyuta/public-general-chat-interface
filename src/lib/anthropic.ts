@@ -26,11 +26,13 @@ export class AnthropicProvider implements LLMProvider {
   readonly name = 'Anthropic Claude';
 
   private readonly apiKey: string;
+  private readonly baseUrl: string;
 
   constructor() {
     const key = process.env.ANTHROPIC_API_KEY;
     if (!key) throw new Error('ANTHROPIC_API_KEY environment variable is not set');
     this.apiKey = key;
+    this.baseUrl = (process.env.ANTHROPIC_BASE_URL ?? 'https://api.anthropic.com').replace(/\/$/, '');
   }
 
   async *streamChat({ systemPrompt, messages, model, maxTokens = 8192, tools }: StreamChatParams): AsyncGenerator<StreamChunk> {
@@ -45,7 +47,7 @@ export class AnthropicProvider implements LLMProvider {
       body.tools = tools;
     }
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch(`${this.baseUrl}/v1/messages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -136,7 +138,7 @@ export class AnthropicProvider implements LLMProvider {
   }
 
   async generateTitle(firstMessage: string): Promise<string> {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch(`${this.baseUrl}/v1/messages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
